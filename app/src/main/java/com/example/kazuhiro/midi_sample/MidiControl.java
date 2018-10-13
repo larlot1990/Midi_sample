@@ -16,7 +16,18 @@ public class MidiControl {
     private Toast toastMessage ;
     private MidiManager midiManager ;
     private MidiDevice midiDevice ;
+    private int InputPortNum ;
     private MidiInputPort inPort ;
+
+    class OnMidiDeviceOpenedListener implements MidiManager.OnDeviceOpenedListener{
+        @Override
+        public void onDeviceOpened(MidiDevice device) {
+            // MIDIデバイスの入力ポートをオープンする。（MIDIデータの入力先）
+            MidiControl.this.midiDevice = device ;
+            inPort = MidiControl.this.midiDevice.openInputPort(MidiControl.this.InputPortNum);
+        }
+    }
+    OnMidiDeviceOpenedListener OpenListener ;
 
     public boolean Initialize(Context context) {
         this.context = context;
@@ -46,18 +57,37 @@ public class MidiControl {
         return this.midiManager.getDevices();
     }
 
+    public MidiDeviceInfo   getSequencerInfo(){
+        if(null != this.midiDevice) {
+            return this.midiDevice.getInfo();
+        }
+        else{
+            return  null ;
+        }
+    }
+
     public void openMidiDevice(){
         // MIDIデバイスをオープンする。
-        MidiDeviceInfo[] infos = this.getMidiDeviceInfo();
-        // 暫定的にMIDIデバイスは1台のみの想定
-        this.midiManager.openDevice(infos[0], new MidiManager.OnDeviceOpenedListener() {
-            @Override
-            public void onDeviceOpened(MidiDevice device) {
-                midiDevice = device ;
-                // MIDIデバイスの入力ポートをオープンする。（MIDIデータの入力先）
-                inPort = midiDevice.openInputPort(0);
+        MidiDeviceInfo[] deviceInfos = this.getMidiDeviceInfo();
+        // 最初に見つけたMIDIシーケンサーに接続する。
+        int i, j ;
+        MIDI_SEARCH_LOOP:   for ( i = 0; i < deviceInfos.length ; i++) {
+            MidiDeviceInfo.PortInfo[] portInfos = deviceInfos[i].getPorts();
+            for ( j = 0; j < portInfos.length; j++){
+                if (MidiDeviceInfo.PortInfo.TYPE_INPUT == portInfos[j].getType()) {
+                    this.InputPortNum = j ;
+                    this.OpenListener = new OnMidiDeviceOpenedListener() ;
+                    // MIDIデバイスをオープンする。
+                    this.midiManager.openDevice(deviceInfos[i], this.OpenListener, null);
+                    break MIDI_SEARCH_LOOP;
+                }
             }
-        }, null);
+        }
+        if( i >= deviceInfos.length ) {
+            this.toastMessage = Toast.makeText(this.context, "Midi sequencer was NOT found.", Toast.LENGTH_SHORT);
+            this.toastMessage.setGravity(Gravity.CENTER, 0, 0);
+            this.toastMessage.show();
+        }
     }
 
     public void noteOn(){
