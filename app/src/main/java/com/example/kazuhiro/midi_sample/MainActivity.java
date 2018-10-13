@@ -58,31 +58,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Bundle prop = info.getProperties();
 
                 // 製造元文字列（"Roland"など）
-                String stringData = prop.getString(MidiDeviceInfo.PROPERTY_MANUFACTURER);
+                String stringData = prop.getString(info.PROPERTY_MANUFACTURER);
                 TextView textView = (TextView) findViewById(R.id.textViewOfManufacture);
                 textView.setText(stringData);
 
                 // 製品名文字列（"EDIROL SD-90"など）
-                stringData = prop.getString(MidiDeviceInfo.PROPERTY_PRODUCT);
+                stringData = prop.getString(info.PROPERTY_PRODUCT);
                 textView = (TextView) findViewById(R.id.textViewOfProduct);
                 textView.setText(stringData);
 
                 // 機器名文字列（"Roland EDIROL SD-90"など）
-                stringData = prop.getString(MidiDeviceInfo.PROPERTY_NAME);
+                stringData = prop.getString(info.PROPERTY_NAME);
                 textView = (TextView) findViewById(R.id.textViewOfName);
                 textView.setText(stringData);
 
                 // バージョン文字列（"1.16"など）
-                stringData = prop.getString(MidiDeviceInfo.PROPERTY_VERSION);
+                stringData = prop.getString(info.PROPERTY_VERSION);
                 textView = (TextView) findViewById(R.id.textViewOfVersion);
                 textView.setText(stringData);
 
                 // Midiデバイスの接続方法確認
-                UsbDevice usbDevice = (UsbDevice) prop.get(MidiDeviceInfo.PROPERTY_USB_DEVICE);
-                if (prop.getBoolean(MidiDeviceInfo.PROPERTY_USB_DEVICE)) {
+                UsbDevice usbDevice = (UsbDevice) prop.get(info.PROPERTY_USB_DEVICE);
+                if (prop.getBoolean(info.PROPERTY_USB_DEVICE)) {
                     textView = (TextView) findViewById(R.id.textViewOfConnectType);
                     textView.setText("USB connect");
-                } else if (prop.getBoolean(MidiDeviceInfo.PROPERTY_BLUETOOTH_DEVICE)) {
+                } else if (prop.getBoolean(info.PROPERTY_BLUETOOTH_DEVICE)) {
                     textView = (TextView) findViewById(R.id.textViewOfConnectType);
                     textView.setText("Bluetooth connect");
                 } else {
