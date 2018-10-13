@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,9 +35,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         this.midiControl = new MidiControl();
         if( this.midiControl.Initialize(MainActivity.this)) {
-            MidiDeviceInfo[] infos = this.midiControl.getMidiDeviceInfo();
-            if (infos.length > 0) {
-                MidiDeviceInfo info = infos[0]; // 説明用に先頭の情報のみアクセスしてます
+            this.midiControl.openMidiDevice() ;
+            MidiDeviceInfo info ;
+
+            int retry = 0 ;
+            do {
+                info = this.midiControl.getSequencerInfo();
+                if(null == info){
+                    try {
+                        Thread.sleep(100);
+                    }
+                    catch(InterruptedException e){
+                        this.toastMessage = Toast.makeText(this, "Thread.Sleep exception!.", Toast.LENGTH_SHORT);
+                        this.toastMessage.setGravity(Gravity.CENTER, 0, 0);
+                        this.toastMessage.show();
+                    }
+                    retry++ ;
+                }
+            }while( null == info && 3 > retry) ;
+
+            if (null != info) {
                 Bundle prop = info.getProperties();
 
                 // 製造元文字列（"Roland"など）
@@ -82,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 textView = (TextView) findViewById(R.id.textViewOfOutports);
                 textView.setText("Number of output ports: " + Integer.toString(numOutputs));
             }
-            this.midiControl.openMidiDevice() ;
         }
         // ボタン押下時の処理を追加
         Button enevtButton = (Button)findViewById(R.id.buttonOfSoundTest) ;
