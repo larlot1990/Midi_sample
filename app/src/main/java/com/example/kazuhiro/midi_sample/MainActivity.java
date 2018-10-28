@@ -16,23 +16,27 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    MidiControl midiControl;
+    private MidiControl midiControl;
+    private Instrument instrument ;
     private Toast toastMessage ;
+    class OnClickListener implements View.OnClickListener{
+        @Override
+        public void onClick(View view) {
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+        }
+    }
+    protected OnClickListener onClickListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.onClickListener = new OnClickListener() ;
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        fab.setOnClickListener(this.onClickListener);
         this.midiControl = new MidiControl();
         if( this.midiControl.Initialize(MainActivity.this)) {
             this.midiControl.openMidiDevice() ;
@@ -104,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // ボタン押下時の処理を追加
         Button enevtButton = (Button)findViewById(R.id.buttonOfSoundTest) ;
         enevtButton.setOnClickListener(this);
+        this.instrument = new Instrument(this.midiControl, 1, MidiControl.MIDImode.Mode3) ;
     }
 
     @Override
@@ -134,6 +139,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.toastMessage.show();
 */
         // ボタン押下時に音を出す
-        this.midiControl.noteOn() ;
+        this.instrument.noteOn(60,127) ;
     }
 }
